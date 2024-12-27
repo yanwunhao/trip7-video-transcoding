@@ -119,8 +119,8 @@ def process_directory(input_directory, output_directory):
 
 if __name__ == "__main__":
     # Get current directory
-    current_directory = "/home/wh.yan/Desktop/trip7-video-transcoding/raw_videos"
-    output_directory = "/home/wh.yan/Desktop/trip7-video-transcoding/outputs"
+    current_directory = "./raw_videos"
+    output_directory = "./outputs"
 
     # Start processing
     process_directory(current_directory, output_directory)
