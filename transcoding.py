@@ -59,7 +59,7 @@ def create_directory(directory_path):
 
 
 def process_directory(input_directory, output_directory):
-    """Process all MP4 files in the directory"""
+    """Process all MP4 files in the directory and its subdirectories"""
     input_dir = Path(input_directory)
     output_dir = Path(output_directory)
 
@@ -68,13 +68,8 @@ def process_directory(input_directory, output_directory):
         print(f"Input directory does not exist or is not valid: {input_dir}")
         return
 
-    # Create output directory if it doesn't exist
-    if not create_directory(output_dir):
-        print("Failed to create output directory")
-        return
-
-    # Get all MP4 files
-    mp4_files = list(input_dir.glob("*.mp4"))
+    # Get all MP4 files recursively
+    mp4_files = list(input_dir.rglob("*.mp4"))
     total_files = len(mp4_files)
 
     if total_files == 0:
@@ -87,7 +82,16 @@ def process_directory(input_directory, output_directory):
 
     # Process each file
     for index, input_file in enumerate(mp4_files, 1):
-        output_file = output_dir / f"encoded_{input_file.name}"
+        # Calculate relative path from input directory
+        relative_path = input_file.relative_to(input_dir)
+
+        # Create corresponding output path
+        output_file = output_dir / relative_path.parent / f"encoded_{input_file.name}"
+
+        # Create output directory if it doesn't exist
+        if not create_directory(output_file.parent):
+            print(f"Failed to create output directory: {output_file.parent}")
+            continue
 
         # Skip if output file already exists
         if output_file.exists():
@@ -96,7 +100,7 @@ def process_directory(input_directory, output_directory):
             )
             continue
 
-        print(f"\n[{index}/{total_files}] Processing: {input_file.name}")
+        print(f"\n[{index}/{total_files}] Processing: {input_file}")
 
         # Get video information
         info = get_video_info(str(input_file))
@@ -111,10 +115,10 @@ def process_directory(input_directory, output_directory):
         # Execute encoding
         if encode_video(str(input_file), str(output_file)):
             duration = time.time() - start_time
-            print(f"Encoding completed: {output_file.name}")
+            print(f"Encoding completed: {output_file}")
             print(f"Time taken: {duration:.2f} seconds")
         else:
-            print(f"Encoding failed: {input_file.name}")
+            print(f"Encoding failed: {input_file}")
 
 
 if __name__ == "__main__":
